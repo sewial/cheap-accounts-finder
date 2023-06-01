@@ -116,7 +116,7 @@ def igv(game, keywords, stars, matc, results, pg):
     k = keywords.replace(" ", "%20")
     if stars == 5:
         stars = 4
-    driver.get(f"https://www.igv.com/c2c-index/search?key={game}%{k}{pg}&star={stars}")
+    driver.get(f"https://www.igv.com/c2c-index/search?key={game}%20{k}{pg}&star={stars}")
     WebDriverWait(driver, 30).until(EC.visibility_of_element_located((By.XPATH, "/html/body/section[1]/div/div/div/div[2]/div/div[3]/div[2]/ul")))
     s = driver.page_source
     soup = BeautifulSoup(s, "html.parser")
