@@ -64,53 +64,56 @@ def eldorado(game, keywords, stars, matc, results):
     else:
         stars = stars*20
     driver.get("https://www.eldorado.gg/")
-    WebDriverWait(driver, 30).until(EC.visibility_of_element_located((By.XPATH, "/html/body/eld-root/div[2]/div[2]/div/eld-home/div[2]/section/div/eld-home-featured-card[1]/div")))
-    #table of available games
-    games = driver.find_elements(By.XPATH, "/html/body/eld-root/eld-navbar/header/div/nav/div[1]/eld-categories-menu/div[2]/div/eld-categories-menu-dropdown[2]/div/div/div/div/eld-categories-menu-all-games/div/div/div")
-    for i in games:
-        #look through game table to find the matching game
-        gametitles = i.find_elements(By.CLASS_NAME, "category-menu-dropdown-item")
-        for x in gametitles:
-            name = x.find_element(By.TAG_NAME, "a").get_attribute("href")
-            if len(g) <= 7:
-                if g[:4].lower() == name[24:28].lower():
-                    driver.get(f"{name}?searchQuery={k}&gamePageOfferIndex=1&gamePageOfferSize=100")
-                    #game offer site
-                    break
-            else:
-                if g[:7].lower() == name[24:31].lower():
-                    driver.get(f"{name}?searchQuery={k}&gamePageOfferIndex=1&gamePageOfferSize=100")
-                    #game offer site
-                    break
-    WebDriverWait(driver, 30).until(EC.visibility_of_element_located((By.XPATH, "/html/body/eld-root/div[2]/div[2]/div/eld-game-page/div/section/div/eld-game-page-multi-offer/eld-game-offers/div")))
-    s = driver.page_source
-    soup = BeautifulSoup(s, "html.parser")
-    offers = soup.find("div", class_="offers")
-    cheapest = {}
-    last = 100000
-    offer = offers.find_all("div")
-    for x in offer:
-        try:
-            title = x.find("div", class_="offer-title hyphenate").text
-            cost = x.find("div", class_="offer-amount").text
-            url = "https://www.eldorado.gg" + str(x.find("a")["href"])
-            star = x.find("div", class_="seller-details").contents[1].text
-            star = float(star.split("%")[0])
-            c = cost.replace("$", "")
-            c = c.replace(",", "")
-            #add to the dict if this offer is cheaper than the last offer
-            if float(c) != last and star >= stars and check(keywords, title, matc):
-                #tuple dict by price
-                cheapest[c] = (title, cost, url)
-                #organise dict to 3 of the cheapest items, compare prices
-                reduce(cheapest, results)
-                last = float(c)
-        except:
-            pass
-    for i in cheapest:
-        (t, c, u) = cheapest[i]
-        format("ELDORADO", t, c, u)
-    print("Found eldorado offers...")
+    try:
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/eld-root/div[2]/div[2]/div/eld-home/div[2]/section/div/eld-home-featured-card[1]/div")))
+        #table of available games
+        games = driver.find_elements(By.XPATH, "/html/body/eld-root/eld-navbar/header/div/nav/div[1]/eld-categories-menu/div[2]/div/eld-categories-menu-dropdown[2]/div/div/div/div/eld-categories-menu-all-games/div/div/div")
+        for i in games:
+            #look through game table to find the matching game
+            gametitles = i.find_elements(By.CLASS_NAME, "category-menu-dropdown-item")
+            for x in gametitles:
+                name = x.find_element(By.TAG_NAME, "a").get_attribute("href")
+                if len(g) <= 7:
+                    if g[:4].lower() == name[24:28].lower():
+                        driver.get(f"{name}?searchQuery={k}&gamePageOfferIndex=1&gamePageOfferSize=100")
+                        #game offer site
+                        break
+                else:
+                    if g[:7].lower() == name[24:31].lower():
+                        driver.get(f"{name}?searchQuery={k}&gamePageOfferIndex=1&gamePageOfferSize=100")
+                        #game offer site
+                        break
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/eld-root/div[2]/div[2]/div/eld-game-page/div/section/div/eld-game-page-multi-offer/eld-game-offers/div")))
+        s = driver.page_source
+        soup = BeautifulSoup(s, "html.parser")
+        offers = soup.find("div", class_="offers")
+        cheapest = {}
+        last = 100000
+        offer = offers.find_all("div")
+        for x in offer:
+            try:
+                title = x.find("div", class_="offer-title hyphenate").text
+                cost = x.find("div", class_="offer-amount").text
+                url = "https://www.eldorado.gg" + str(x.find("a")["href"])
+                star = x.find("div", class_="seller-details").contents[1].text
+                star = float(star.split("%")[0])
+                c = cost.replace("$", "")
+                c = c.replace(",", "")
+                #add to the dict if this offer is cheaper than the last offer
+                if float(c) != last and star >= stars and check(keywords, title, matc):
+                    #tuple dict by price
+                    cheapest[c] = (title, cost, url)
+                    #organise dict to 3 of the cheapest items, compare prices
+                    reduce(cheapest, results)
+                    last = float(c)
+            except:
+                pass
+        for i in cheapest:
+            (t, c, u) = cheapest[i]
+            format("ELDORADO", t, c, u)
+        print("Found eldorado offers...")
+    except:
+        print("Didn't find eldorado offers...")
 
 def igv(game, keywords, stars, matc, results, pg):
     k = keywords.replace(" ", "%20")
@@ -150,36 +153,39 @@ def g2g(game, keywords, stars, matc, results):
     k = keywords.replace(" ", "%20")
     driver.get(f"https://www.g2g.com/trending/accounts?q={g}")
     #wait for page to load
-    WebDriverWait(driver, 30).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div/div[1]/main/div[4]/div[2]/div/div/div[1]/div/a/div/div[2]")))
-    #find the game
-    s = driver.page_source
-    soup = BeautifulSoup(s, "html.parser")
-    t = soup.find("div", class_="col-sm-4 col-md-3 col-12")
-    games = t.find("div", class_="fit")
-    driver.get("https://www.g2g.com" + str(games.find("a")["href"]) + f"?sort=lowest_price&q={k}")
-    WebDriverWait(driver, 30).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div/div[1]/div[1]/div[5]/div[2]/div/div[2]/div[1]/div/a/div[1]")))
-    s = driver.page_source
-    soup = BeautifulSoup(s, "html.parser")
-    offers = soup.find("div", class_="row q-col-gutter-sm-md q-px-sm-md")
-    offer = offers.find_all("div", class_="col-xs-12 col-sm-6 col-md-3")
-    cheapest = {}
-    last = 100000
-    for x in offer:
-        try:
-            title = x.find("span").text.strip()
-            c = x.find("div", class_="text-body1 text-weight-medium").text.strip()
-            cost = "$ " + c
-            url = str(x.find("a")["href"])
-            if float(c) != last and check(keywords, title, matc):
-                cheapest[c] = (title, cost, url)
-                reduce(cheapest, results)
-                last = float(c)
-        except:
-            pass
-    for i in cheapest:
-        (t, c, u) = cheapest[i]
-        format("G2G", t, c, u)
-    print("Found g2g offers...")
+    try:
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div/div[1]/main/div[4]/div[2]/div/div/div[1]/div/a/div/div[2]")))
+        #find the game
+        s = driver.page_source
+        soup = BeautifulSoup(s, "html.parser")
+        t = soup.find("div", class_="col-sm-4 col-md-3 col-12")
+        games = t.find("div", class_="fit")
+        driver.get("https://www.g2g.com" + str(games.find("a")["href"]) + f"?sort=lowest_price&q={k}")
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div/div[1]/div[1]/div[5]/div[2]/div/div[2]/div[1]/div/a/div[1]")))
+        s = driver.page_source
+        soup = BeautifulSoup(s, "html.parser")
+        offers = soup.find("div", class_="row q-col-gutter-sm-md q-px-sm-md")
+        offer = offers.find_all("div", class_="col-xs-12 col-sm-6 col-md-3")
+        cheapest = {}
+        last = 100000
+        for x in offer:
+            try:
+                title = x.find("span").text.strip()
+                c = x.find("div", class_="text-body1 text-weight-medium").text.strip()
+                cost = "$ " + c
+                url = str(x.find("a")["href"])
+                if float(c) != last and check(keywords, title, matc):
+                    cheapest[c] = (title, cost, url)
+                    reduce(cheapest, results)
+                    last = float(c)
+            except:
+                pass
+        for i in cheapest:
+            (t, c, u) = cheapest[i]
+            format("G2G", t, c, u)
+        print("Found g2g offers...")
+    except:
+        print("Didn't find g2g offers...")
 
 def check(k, title, matc):
     if matc == "y":
